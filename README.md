@@ -135,6 +135,12 @@ The suite has 7 tests covering detectors, the engine, the PDF pipeline, and face
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). For security issues, see [SECURITY.md](SECURITY.md).
 
+## Related tools
+
+- [shamba](https://github.com/iambiniyam/shamba): offline plant health scanner for gardeners and farmers.
+- [snap2sheet](https://github.com/iambiniyam/snap2sheet): receipt and invoice photos to CSV or Excel.
+- [find-local](https://github.com/iambiniyam/find-local): offline semantic search for files, PDFs, and photos.
+
 ## License
 
 MIT. The YuNet face model comes from the OpenCV Zoo and has its own license. See [THIRD_PARTY.md](THIRD_PARTY.md).
