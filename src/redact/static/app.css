@@ -549,3 +549,7 @@ td {
     transition-duration: 0.01ms !important;
   }
 }
+
+.finding-check { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.table-wrap:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 8px; }

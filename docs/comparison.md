@@ -9,6 +9,7 @@
 
 - One local command or local page for PDFs and photos, including OCR and face detection.
 - The output PDF is rasterized so the original text layer and metadata cannot leak.
+- Per-finding review: uncheck a false positive and only the accepted findings are redacted.
 - A masked JSON report and a masked HTML audit report are written next to the redacted file.
 - No upload, account, or cloud API.
 

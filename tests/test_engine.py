@@ -70,3 +70,17 @@ def test_pdf_redaction(tmp_path):
     assert result.pages == 1
     assert result.counts.get("email", 0) >= 1
     assert any("rasterized" in warning for warning in result.warnings)
+
+
+def test_review_selection_keeps_only_accepted_findings(pii_image, tmp_path):
+    detected = process(pii_image, dry_run=True, face_model=None, ocr_backend="rapidocr")
+    accepted = next(finding for finding in detected.findings if finding.kind == "email")
+    result = process(
+        pii_image,
+        tmp_path / "selected.png",
+        face_model=None,
+        ocr_backend="rapidocr",
+        selected={accepted.digest()},
+    )
+    assert set(result.counts) == {"email"}
+    assert [finding.kind for finding in result.findings] == ["email"]

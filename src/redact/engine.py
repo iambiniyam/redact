@@ -87,6 +87,13 @@ def _filter(findings: list[Finding], kinds: set[str] | None) -> list[Finding]:
     return [finding for finding in findings if finding.kind in kinds]
 
 
+def _selected(findings: list[Finding], selected: set[str] | None) -> list[Finding]:
+    """Keep only findings accepted in review. None means every finding."""
+    if selected is None:
+        return findings
+    return [finding for finding in findings if finding.digest() in selected]
+
+
 def scan_image(
     image: np.ndarray,
     page: int = 0,
@@ -108,8 +115,13 @@ def process(
     kinds: set[str] | None = None,
     dry_run: bool = False,
     ocr_backend: str = "auto",
+    selected: set[str] | None = None,
 ) -> ScanResult:
-    """Redact a PDF or image. Returns findings and writes the report."""
+    """Redact a PDF or image. Returns findings and writes the report.
+
+    ``selected`` is an optional set of finding digests accepted in review.
+    ``None`` keeps every finding; an empty set keeps none.
+    """
     input_path = Path(input_path)
     if not input_path.exists():
         raise FileNotFoundError(input_path)
@@ -121,10 +133,10 @@ def process(
     suffix = input_path.suffix.lower()
     if suffix == ".pdf":
         return _process_pdf(
-            input_path, output_path, report_path, dpi, face_model, kind_set, dry_run, ocr_backend
+            input_path, output_path, report_path, dpi, face_model, kind_set, dry_run, ocr_backend, selected
         )
     return _process_image(
-        input_path, output_path, report_path, face_model, kind_set, dry_run, ocr_backend
+        input_path, output_path, report_path, face_model, kind_set, dry_run, ocr_backend, selected
     )
 
 
@@ -136,12 +148,16 @@ def _process_image(
     kinds: set[str] | None,
     dry_run: bool,
     ocr_backend: str,
+    selected: set[str] | None = None,
 ) -> ScanResult:
     image = cv2.imread(str(input_path), cv2.IMREAD_COLOR)
     if image is None:
         raise ValueError(f"cannot read image: {input_path}")
 
-    findings = scan_image(image, face_model=face_model, kinds=kinds, ocr_backend=ocr_backend)
+    findings = _selected(
+        scan_image(image, face_model=face_model, kinds=kinds, ocr_backend=ocr_backend),
+        selected,
+    )
     masked = _draw_masks(image, findings)
 
     result = ScanResult(input_path=input_path, output_path=None, pages=1, findings=findings)
@@ -166,6 +182,7 @@ def _process_pdf(
     kinds: set[str] | None,
     dry_run: bool,
     ocr_backend: str,
+    selected: set[str] | None = None,
 ) -> ScanResult:
     document = fitz.open(input_path)
     redacted_pages: list[np.ndarray] = []
@@ -178,7 +195,7 @@ def _process_pdf(
             lines = ocr_lines(image, backend=ocr_backend)
         page_findings = detect_lines(lines, page=index)
         page_findings += detect_faces(image, face_model, page=index)
-        page_findings = _filter(page_findings, kinds)
+        page_findings = _selected(_filter(page_findings, kinds), selected)
         findings.extend(page_findings)
         redacted_pages.append(_draw_masks(image, page_findings))
 

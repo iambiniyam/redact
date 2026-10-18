@@ -9,7 +9,7 @@ Drop in a PDF or a photo. redact finds emails, phone numbers, card numbers, IBAN
 
 ![redact web UI](docs/demo.png)
 
-Status: v0.2.2. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
+Status: v0.2.3. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
 
 ## Why
 
@@ -156,11 +156,10 @@ rasterized PDF or PNG, plus a masked audit JSON
 pytest -q
 ```
 
-The suite has 12 tests covering detectors, OCR selection, the engine, the PDF pipeline, faces, and the masked HTML report.
+The suite has 13 tests covering detectors, OCR selection, the engine, the PDF pipeline, faces, selected-finding review, and the masked HTML report.
 
 ## Roadmap
 
-- accept or reject each finding before export
 - signature and stamp detection
 - license plate detection
 - multilingual NER for names and addresses without labels

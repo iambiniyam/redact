@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>redact: share the document, not your data</title>
-  <link rel="stylesheet" href="/static/app.css?v=3">
-  <script src="/static/app.js?v=3" defer></script>
+  <link rel="stylesheet" href="/static/app.css?v=4">
+  <script src="/static/app.js?v=4" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -53,7 +53,7 @@
             <option value="indra">Indra OCR (optional)</option>
           </select>
         </div>
-        <button id="go" class="btn" type="button">Redact</button>
+        <button id="go" class="btn" type="button">Scan</button>
       </div>
       <p id="status" class="status" role="status" aria-live="polite"></p>
     </section>
@@ -71,10 +71,10 @@
         <div class="card findings-card">
           <h3>Findings</h3>
           <p id="count-note" class="meta"></p>
-          <div class="table-wrap">
+          <div class="table-wrap" tabindex="0" role="region" aria-label="Findings table">
             <table>
               <thead>
-                <tr><th>Type</th><th>Page</th><th>Preview</th><th>Source</th><th>Conf.</th></tr>
+                <tr><th><input id="select-all" type="checkbox" checked aria-label="Include all findings"></th><th>Type</th><th>Page</th><th>Preview</th><th>Source</th><th>Conf.</th></tr>
               </thead>
               <tbody id="findings"></tbody>
             </table>
@@ -85,11 +85,12 @@
       <div id="warnings" class="warnings"></div>
 
       <div class="actions">
-        <a id="download" class="btn" href="#">Download redacted file</a>
-        <a id="report" class="btn ghost" href="#">Download audit report</a>
-        <a id="html-report" class="btn ghost" href="#">Download HTML report</a>
+        <button id="apply" class="btn" type="button" hidden>Redact selected</button>
+        <a id="download" class="btn" href="#" hidden>Download redacted file</a>
+        <a id="report" class="btn ghost" href="#" hidden>Download audit report</a>
+        <a id="html-report" class="btn ghost" href="#" hidden>Download HTML report</a>
       </div>
-      <p class="note">The audit report stores masked previews only. Review the redacted file before sharing it.</p>
+      <p class="note">Uncheck anything that should stay visible, then redact the selection. The audit report stores masked previews only.</p>
     </section>
   </main>
 
