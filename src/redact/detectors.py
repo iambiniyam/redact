@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 from typing import Iterable
 
@@ -12,6 +11,7 @@ import cv2
 import numpy as np
 
 from .findings import Finding
+from .ocr import TextLine, ocr_lines
 
 EMAIL = re.compile(r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b")
 PHONE = re.compile(r"(?<!\d)(?:\+?\d{1,3}[\s.\-]?)?(?:\(?\d{2,4}\)?[\s.\-]?){2,5}\d{2,4}(?!\d)")
@@ -41,13 +41,6 @@ _LABEL_KIND = {
     "nin": "national_id",
     "ssn": "ssn",
 }
-
-
-@dataclass(frozen=True, slots=True)
-class TextLine:
-    text: str
-    bbox: tuple[float, float, float, float]
-    confidence: float = 1.0
 
 
 def luhn(number: str) -> bool:
@@ -87,25 +80,6 @@ def _bbox_union(boxes: Iterable[tuple[float, float, float, float]]) -> tuple[flo
         max(b[2] for b in boxes),
         max(b[3] for b in boxes),
     )
-
-
-@lru_cache(maxsize=1)
-def _ocr():
-    from rapidocr_onnxruntime import RapidOCR
-
-    return RapidOCR()
-
-
-def ocr_lines(image_bgr: np.ndarray) -> list[TextLine]:
-    """Run RapidOCR and normalize boxes."""
-    result, _elapsed = _ocr()(image_bgr)
-    lines: list[TextLine] = []
-    for item in result or []:
-        box, text, score = item[0], item[1], float(item[2])
-        xs = [point[0] for point in box]
-        ys = [point[1] for point in box]
-        lines.append(TextLine(text=str(text), bbox=(min(xs), min(ys), max(xs), max(ys)), confidence=score))
-    return lines
 
 
 def detect_lines(lines: list[TextLine], page: int = 0) -> list[Finding]:

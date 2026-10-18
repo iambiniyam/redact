@@ -12,6 +12,7 @@ from rich.table import Table
 
 from .config import Paths
 from .engine import process
+from .ocr import backend_status
 
 app = typer.Typer(add_completion=False, help="Offline PII redaction for PDFs and images.")
 console = Console()
@@ -43,11 +44,12 @@ def scan(
     file: Path = typer.Argument(..., exists=True, readable=True),
     dpi: int = typer.Option(200, help="Rasterization DPI for PDFs."),
     no_faces: bool = typer.Option(False, "--no-faces", help="Skip face detection."),
+    ocr: str = typer.Option("auto", "--ocr", help="auto, rapidocr, or indra."),
     json_out: bool = typer.Option(False, "--json", help="Print the report as JSON."),
 ) -> None:
     """Detect PII without writing a redacted file."""
     model = None if no_faces else Paths.default().face_model
-    result = process(file, dry_run=True, dpi=dpi, face_model=model)
+    result = process(file, dry_run=True, dpi=dpi, face_model=model, ocr_backend=ocr)
     if json_out:
         typer.echo(json.dumps(result.report(), indent=2, ensure_ascii=False))
         return
@@ -63,10 +65,13 @@ def apply(
     report: Path | None = typer.Option(None, "--report", "-r"),
     dpi: int = typer.Option(200),
     no_faces: bool = typer.Option(False, "--no-faces"),
+    ocr: str = typer.Option("auto", "--ocr", help="auto, rapidocr, or indra."),
 ) -> None:
     """Redact a PDF or image and write an audit report."""
     model = None if no_faces else Paths.default().face_model
-    result = process(file, output_path=output, report_path=report, dpi=dpi, face_model=model)
+    result = process(
+        file, output_path=output, report_path=report, dpi=dpi, face_model=model, ocr_backend=ocr
+    )
     _print_findings(result)
     if result.output_path:
         console.print(Panel(f"[green]{result.output_path}[/green]", title="Redacted file"))
@@ -98,4 +103,8 @@ def doctor() -> None:
     )
     if not paths.face_model.exists():
         console.print("Run: [bold]python scripts/download_models.py[/bold]")
+    status = backend_status()
+    console.print(f"OCR: [bold]{status['auto']}[/bold] (indra installed: {status['indra']})")
+    if not status["indra"]:
+        console.print("  optional: python scripts/download_models.py --with-indra")
     console.print("[green]ready[/green]")

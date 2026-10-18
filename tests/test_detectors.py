@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from redact.config import Paths
+from redact.ocr import resolve_backend
 from redact.detectors import (
     TextLine,
     detect_faces,
@@ -44,3 +45,7 @@ def test_faces():
 
     found = detect_faces(cv2.imread(str(face)), model)
     assert len(found) >= 1
+
+
+def test_backend_resolution():
+    assert resolve_backend("rapidocr") == "rapidocr"

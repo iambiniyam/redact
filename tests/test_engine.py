@@ -31,7 +31,7 @@ def pii_image(tmp_path_factory):
 def test_image_redaction(pii_image, tmp_path):
     output = tmp_path / "redacted.png"
     report = tmp_path / "report.json"
-    result = process(pii_image, output, report, face_model=None)
+    result = process(pii_image, output, report, face_model=None, ocr_backend='rapidocr')
 
     assert output.exists()
     assert result.counts.get("email", 0) >= 1
@@ -48,7 +48,7 @@ def test_image_redaction(pii_image, tmp_path):
 
 def test_dry_run_does_not_write(pii_image, tmp_path):
     output = tmp_path / "should-not-exist.png"
-    result = process(pii_image, output, dry_run=True, face_model=None)
+    result = process(pii_image, output, dry_run=True, face_model=None, ocr_backend='rapidocr')
     assert not output.exists()
     assert result.output_path is None
 
@@ -65,7 +65,7 @@ def test_pdf_redaction(tmp_path):
     doc.close()
 
     output = tmp_path / "doc.redacted.pdf"
-    result = process(source, output, face_model=None)
+    result = process(source, output, face_model=None, ocr_backend='rapidocr')
     assert output.exists()
     assert result.pages == 1
     assert result.counts.get("email", 0) >= 1

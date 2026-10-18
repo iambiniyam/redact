@@ -14,7 +14,8 @@ import pymupdf as fitz
 import numpy as np
 
 from .config import DEFAULT_DPI, Paths
-from .detectors import TextLine, detect_faces, detect_lines, ocr_lines
+from .detectors import TextLine, detect_faces, detect_lines
+from .ocr import ocr_lines
 from .findings import Finding
 
 WARNING_RASTER = "PDF output is rasterized: the text layer and metadata are removed to prevent hidden-data leaks."
@@ -91,8 +92,9 @@ def scan_image(
     page: int = 0,
     face_model: Path | None = None,
     kinds: set[str] | None = None,
+    ocr_backend: str = "auto",
 ) -> list[Finding]:
-    findings = detect_lines(ocr_lines(image), page)
+    findings = detect_lines(ocr_lines(image, backend=ocr_backend), page)
     findings += detect_faces(image, face_model, page=page)
     return _filter(findings, kinds)
 
@@ -105,6 +107,7 @@ def process(
     face_model: Path | None = None,
     kinds: set[str] | None = None,
     dry_run: bool = False,
+    ocr_backend: str = "auto",
 ) -> ScanResult:
     """Redact a PDF or image. Returns findings and writes the report."""
     input_path = Path(input_path)
@@ -117,8 +120,12 @@ def process(
 
     suffix = input_path.suffix.lower()
     if suffix == ".pdf":
-        return _process_pdf(input_path, output_path, report_path, dpi, face_model, kind_set, dry_run)
-    return _process_image(input_path, output_path, report_path, face_model, kind_set, dry_run)
+        return _process_pdf(
+            input_path, output_path, report_path, dpi, face_model, kind_set, dry_run, ocr_backend
+        )
+    return _process_image(
+        input_path, output_path, report_path, face_model, kind_set, dry_run, ocr_backend
+    )
 
 
 def _process_image(
@@ -128,12 +135,13 @@ def _process_image(
     face_model: Path | None,
     kinds: set[str] | None,
     dry_run: bool,
+    ocr_backend: str,
 ) -> ScanResult:
     image = cv2.imread(str(input_path), cv2.IMREAD_COLOR)
     if image is None:
         raise ValueError(f"cannot read image: {input_path}")
 
-    findings = scan_image(image, face_model=face_model, kinds=kinds)
+    findings = scan_image(image, face_model=face_model, kinds=kinds, ocr_backend=ocr_backend)
     masked = _draw_masks(image, findings)
 
     result = ScanResult(input_path=input_path, output_path=None, pages=1, findings=findings)
@@ -157,6 +165,7 @@ def _process_pdf(
     face_model: Path | None,
     kinds: set[str] | None,
     dry_run: bool,
+    ocr_backend: str,
 ) -> ScanResult:
     document = fitz.open(input_path)
     redacted_pages: list[np.ndarray] = []
@@ -166,7 +175,7 @@ def _process_pdf(
         image = _render_pdf_page(page, dpi)
         lines = _pdf_page_lines(page, dpi)
         if sum(len(line.text) for line in lines) < 20:
-            lines = ocr_lines(image)
+            lines = ocr_lines(image, backend=ocr_backend)
         page_findings = detect_lines(lines, page=index)
         page_findings += detect_faces(image, face_model, page=index)
         page_findings = _filter(page_findings, kinds)

@@ -1,6 +1,6 @@
 [project]
 name = "redact-local"
-version = "0.1.0"
+version = "0.2.0"
 description = "Offline PII redaction for PDFs and images. Share the document, not your data."
 readme = "README.md"
 requires-python = ">=3.10"

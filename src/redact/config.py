@@ -11,6 +11,10 @@ def model_dir() -> Path:
     return Path(os.getenv("REDACT_MODEL_DIR", str(Path.home() / ".redact" / "models")))
 
 
+def indra_dir() -> Path:
+    return Path(os.getenv("REDACT_INDRA_DIR", str(model_dir() / "indra")))
+
+
 @dataclass(slots=True)
 class Paths:
     face_model: Path

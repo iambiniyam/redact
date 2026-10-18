@@ -9,13 +9,21 @@ Drop in a PDF or a photo. redact finds emails, phone numbers, card numbers, IBAN
 
 ![redact web UI](docs/demo.png)
 
-Status: early MVP. Detection is OCR-based and the output should always be reviewed before it is sent.
+Status: v0.2.0. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
 
 ## Why
 
 People send passport photos, medical forms, contracts, and receipts over email and chat every day. Many PDF redaction tools upload the original file. Some leave the text underneath the black box, where it can still be copied or searched.
 
 redact keeps the file local. It also flattens PDF pages and clears metadata, so hidden text and annotations do not survive the export.
+
+## What is new in 0.2.0
+
+- Rebuilt interface with drag and drop, paste, a redacted preview, a findings table, and an audit report download.
+- Automatic dark mode, keyboard support, loading states, error recovery, and mobile layouts.
+- Optional Indra OCR alongside RapidOCR.
+- Visible OCR choice and a local-only badge.
+- An OCR benchmark that measures speed, confidence, and PII recall.
 
 ## What it finds
 
@@ -43,7 +51,28 @@ redact apply tests/fixtures/pii_form.png -o form.redacted.png --report report.js
 redact serve
 ```
 
-The face detector is about 230 KB. The OCR models ship with the RapidOCR wheel.
+The face detector is about 230 KB. The RapidOCR models ship with the wheel.
+
+For the optional Indra backend:
+
+```bash
+uv pip install -e ".[indra]"
+python scripts/download_models.py --with-indra
+redact scan contract.pdf --ocr indra
+```
+
+`auto` uses Indra when its models are installed, and RapidOCR otherwise.
+
+## OCR benchmark
+
+A clean synthetic PII form with seven labelled fields. See [docs/evaluation.md](docs/evaluation.md).
+
+| Backend | Mean latency | P95 latency | Confidence | PII recall |
+|---|---|---|---|---|
+| RapidOCR | 1060 ms | 1201 ms | 0.985 | 1.00 |
+| Indra OCR | 248 ms | 457 ms | 0.990 | 1.00 |
+
+Indra is optional because its model weights use an OpenRAIL-M license. RapidOCR is Apache-2.0. The code stays MIT either way.
 
 ## CLI
 
@@ -56,20 +85,26 @@ redact apply contract.pdf -o contract.safe.pdf --report audit.json
 
 # skip faces, which is faster and does not need the model
 redact apply id.png --no-faces
+
+# choose the OCR engine
+redact apply id.png --ocr indra
+redact apply id.png --ocr rapidocr
 ```
 
-Example output:
+## Web UI
 
-```
-Findings: {'email': 1, 'phone': 1, 'card': 1}
-+--------+------+------------------+--------+------------+
-| Kind   | Page | Preview          | Source | Confidence |
-+--------+------+------------------+--------+------------+
-| email  |    1 | j***@example.com | regex  |       1.00 |
-| phone  |    1 | ***4567          | regex  |       0.98 |
-| card   |    1 | ***1111          | regex  |       0.98 |
-+--------+------+------------------+--------+------------+
-```
+`redact serve` opens a local review page with:
+
+- drag and drop, file picker, and paste support
+- an OCR engine choice
+- a redacted preview before download
+- a findings table with type, page, masked preview, source, and confidence
+- redacted file and audit report downloads
+- loading, empty, and error states
+- automatic dark mode and reduced-motion support
+- keyboard access and visible focus
+
+The page has no external fonts, scripts, or CDNs.
 
 ## How it works
 
@@ -80,7 +115,7 @@ PDF or image
 render at 200 DPI
   |
   v
-text layer or RapidOCR
+RapidOCR or Indra OCR
   |
   +--> regex and labeled fields
   |
@@ -94,7 +129,7 @@ rasterized PDF or PNG, plus a masked audit JSON
 ```
 
 - Digital PDFs use the embedded text layer, which gives accurate boxes.
-- Scanned PDFs and images go through RapidOCR, which runs on CPU with ONNX.
+- Scanned PDFs and images go through the selected OCR backend.
 - Faces use YuNet when `scripts/download_models.py` has been run.
 - PDF output is rasterized on purpose. The text layer, annotations, and metadata are removed.
 
@@ -119,28 +154,28 @@ rasterized PDF or PNG, plus a masked audit JSON
 pytest -q
 ```
 
-The suite has 7 tests covering detectors, the engine, the PDF pipeline, and faces.
+The suite has 8 tests covering detectors, OCR selection, the engine, the PDF pipeline, and faces.
 
 ## Roadmap
 
+- accept or reject each finding before export
 - signature and stamp detection
 - license plate detection
 - multilingual NER for names and addresses without labels
 - batch mode with a review queue
-- side-by-side review with accept or reject for each finding
-- optional text-layer-preserving redaction with verified removal
+- side-by-side review with per-finding controls
 - a public benchmark that measures recall per PII type
+
+## Related tools
+
+- [snap2sheet](https://github.com/iambiniyam/snap2sheet): receipt and invoice photos to CSV or Excel.
+- [find-local](https://github.com/iambiniyam/find-local): offline semantic search for files, PDFs, and photos.
+- [shamba](https://github.com/iambiniyam/shamba): offline plant health scanner for gardeners and farmers.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). For security issues, see [SECURITY.md](SECURITY.md).
 
-## Related tools
-
-- [shamba](https://github.com/iambiniyam/shamba): offline plant health scanner for gardeners and farmers.
-- [snap2sheet](https://github.com/iambiniyam/snap2sheet): receipt and invoice photos to CSV or Excel.
-- [find-local](https://github.com/iambiniyam/find-local): offline semantic search for files, PDFs, and photos.
-
 ## License
 
-MIT. The YuNet face model comes from the OpenCV Zoo and has its own license. See [THIRD_PARTY.md](THIRD_PARTY.md).
+MIT. The YuNet face model comes from the OpenCV Zoo and has its own license. Indra OCR is optional and its weights have their own license. See [THIRD_PARTY.md](THIRD_PARTY.md).
