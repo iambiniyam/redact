@@ -156,7 +156,7 @@ rasterized PDF or PNG, plus a masked audit JSON
 pytest -q
 ```
 
-The suite has 13 tests covering detectors, OCR selection, the engine, the PDF pipeline, faces, selected-finding review, and the masked HTML report.
+The suite has 14 tests covering detectors, OCR selection, the engine, the PDF pipeline, faces, selected-finding review, and the masked HTML report.
 
 ## Roadmap
 
