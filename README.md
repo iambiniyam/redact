@@ -9,7 +9,7 @@ Drop in a PDF or a photo. redact finds emails, phone numbers, card numbers, IBAN
 
 ![redact web UI](docs/demo.png)
 
-Status: v0.2.3. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
+Status: v0.2.4. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
 
 ## Why
 

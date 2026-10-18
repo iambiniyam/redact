@@ -44,7 +44,7 @@ ALLOWED = {".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".bmp"}
 MAX_UPLOAD = 25 * 1024 * 1024
 MAX_PDF_PAGES = 100
 
-app = FastAPI(title="redact", version="0.2.3")
+app = FastAPI(title="redact", version="0.2.4")
 
 
 class ApplyRequest(BaseModel):
