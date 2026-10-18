@@ -150,6 +150,10 @@ rasterized PDF or PNG, plus a masked audit JSON
 - Faces need the YuNet model. Profile faces and very small faces can be missed.
 - Review the redacted file before sharing it. This tool reduces risk. It does not remove all of it.
 
+## Performance
+
+See [docs/performance.md](docs/performance.md) for measured timings and limits.
+
 ## Tests
 
 ```bash
