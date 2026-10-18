@@ -1,5 +1,8 @@
 # redact
 
+[![ci](https://github.com/iambiniyam/redact/actions/workflows/ci.yml/badge.svg)](https://github.com/iambiniyam/redact/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 Remove personal information from documents before you share them.
 
 Drop in a PDF or a photo. redact finds emails, phone numbers, card numbers, IBANs, SSNs, names, addresses, passport and ID fields, and faces. It blacks them out and leaves an audit report. The file never leaves your machine.
