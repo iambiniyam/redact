@@ -20,7 +20,7 @@ class Paths:
     face_model: Path
 
     @classmethod
-    def default(cls) -> "Paths":
+    def default(cls) -> Paths:
         return cls(face_model=model_dir() / "face_detection_yunet.onnx")
 
 

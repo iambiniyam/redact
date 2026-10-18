@@ -17,9 +17,25 @@ from .ocr import OCRUnavailable, backend_status
 OUTPUT_DIR = Path.home() / ".redact" / "out"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 STATIC = Path(__file__).resolve().parent / "static"
-ALLOWED = {".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".bmp"}
 
-app = FastAPI(title="redact", version="0.2.0")
+
+def cleanup_old_uploads() -> None:
+    """Remove original uploads left by older versions. Keep outputs and reports."""
+    for path in OUTPUT_DIR.iterdir():
+        if not path.is_file():
+            continue
+        name = path.name
+        if ".redacted." in name or name.endswith(".report.json"):
+            continue
+        path.unlink(missing_ok=True)
+
+
+cleanup_old_uploads()
+ALLOWED = {".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".bmp"}
+MAX_UPLOAD = 25 * 1024 * 1024
+MAX_PDF_PAGES = 100
+
+app = FastAPI(title="redact", version="0.2.1")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
@@ -39,9 +55,28 @@ async def redact(file: UploadFile = File(...), ocr: str = Form("auto")) -> JSONR
     if suffix not in ALLOWED:
         raise HTTPException(status_code=400, detail="unsupported file type")
 
+    payload = await file.read(MAX_UPLOAD + 1)
+    if len(payload) > MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="file too large (max 25 MB)")
+
     job = uuid.uuid4().hex
     source = OUTPUT_DIR / f"{job}{suffix}"
-    source.write_bytes(await file.read())
+    source.write_bytes(payload)
+    if suffix == ".pdf":
+        import pymupdf
+
+        try:
+            with pymupdf.open(source) as document:
+                if document.page_count > MAX_PDF_PAGES:
+                    raise HTTPException(
+                        status_code=413, detail="PDF has too many pages (max 100)"
+                    )
+        except HTTPException:
+            source.unlink(missing_ok=True)
+            raise
+        except Exception as exc:
+            source.unlink(missing_ok=True)
+            raise HTTPException(status_code=400, detail="not a readable PDF") from exc
     output = OUTPUT_DIR / f"{job}.redacted{suffix if suffix != '.pdf' else '.pdf'}"
     report = OUTPUT_DIR / f"{job}.report.json"
 
@@ -56,8 +91,10 @@ async def redact(file: UploadFile = File(...), ocr: str = Form("auto")) -> JSONR
         )
     except OCRUnavailable as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:  # noqa: BLE001 - surface a readable message to the UI
+    except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+    finally:
+        source.unlink(missing_ok=True)
     elapsed = round((time.perf_counter() - started) * 1000)
 
     return JSONResponse(

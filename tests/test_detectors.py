@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 
 from redact.config import Paths
-from redact.ocr import resolve_backend
 from redact.detectors import (
     TextLine,
     detect_faces,
@@ -11,6 +10,7 @@ from redact.detectors import (
     iban_valid,
     luhn,
 )
+from redact.ocr import resolve_backend
 
 
 def test_luhn():

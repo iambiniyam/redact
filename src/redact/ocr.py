@@ -7,7 +7,6 @@ import tempfile
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Sequence
 
 import cv2
 import numpy as np
@@ -84,9 +83,8 @@ def _indra_lines(image_bgr: np.ndarray) -> list[TextLine]:
     threads = int(os.getenv("REDACT_INDRA_THREADS", "2"))
     converter = _indra(str(folder), threads)
 
-    handle = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
-    temp_path = Path(handle.name)
-    handle.close()
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as handle:
+        temp_path = Path(handle.name)
     try:
         if not cv2.imwrite(str(temp_path), image_bgr):
             raise OCRUnavailable("could not prepare the image for Indra OCR")

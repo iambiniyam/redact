@@ -4,19 +4,19 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
 
 import cv2
-import pymupdf as fitz
 import numpy as np
+import pymupdf as fitz
 
 from .config import DEFAULT_DPI, Paths
 from .detectors import TextLine, detect_faces, detect_lines
-from .ocr import ocr_lines
 from .findings import Finding
+from .ocr import ocr_lines
 
 WARNING_RASTER = "PDF output is rasterized: the text layer and metadata are removed to prevent hidden-data leaks."
 

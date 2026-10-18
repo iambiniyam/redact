@@ -11,6 +11,31 @@ from pathlib import Path
 
 from redact.config import FACE_MODEL_URL, Paths, indra_dir
 
+INDRA_BASE = "https://huggingface.co/datalab-to/indra-ocr/resolve/main"
+INDRA_FILES = (
+    "det.onnx",
+    "rec.onnx",
+    "rec_cjk.onnx",
+    "order.onnx",
+    "orient.onnx",
+    "script.onnx",
+    "model.safetensors",
+    "meta.json",
+    "math_enc.onnx",
+    "math_dec_step.onnx",
+    "math_dec_init.onnx",
+    "mathcls.onnx",
+    "config.json",
+)
+
+
+def fetch(url: str, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    temp = dest.with_suffix(dest.suffix + ".part")
+    with urllib.request.urlopen(url, timeout=120) as response, temp.open("wb") as handle:
+        shutil.copyfileobj(response, handle)
+    temp.replace(dest)
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()

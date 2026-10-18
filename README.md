@@ -9,7 +9,7 @@ Drop in a PDF or a photo. redact finds emails, phone numbers, card numbers, IBAN
 
 ![redact web UI](docs/demo.png)
 
-Status: v0.2.0. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
+Status: v0.2.1. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
 
 ## Why
 
@@ -138,7 +138,7 @@ rasterized PDF or PNG, plus a masked audit JSON
 - No telemetry, no API keys, and no network calls at runtime.
 - Audit reports store masked previews such as `j***@example.com` and `***1111`, plus a digest. They do not store the original value.
 - PDFs are flattened and metadata is cleared.
-- The web UI writes to `~/.redact/out`. You can delete that folder at any time.
+- The original upload is deleted after processing. Redacted outputs and reports stay in `~/.redact/out` until you delete them.
 
 ## Limits
 
@@ -154,7 +154,7 @@ rasterized PDF or PNG, plus a masked audit JSON
 pytest -q
 ```
 
-The suite has 8 tests covering detectors, OCR selection, the engine, the PDF pipeline, and faces.
+The suite has 10 tests covering detectors, OCR selection, the engine, the PDF pipeline, and faces.
 
 ## Roadmap
 

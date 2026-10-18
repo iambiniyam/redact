@@ -36,7 +36,7 @@ def measure(backend: str, runs: int = 5) -> dict:
         "lines": len(lines),
         "avg_confidence": round(confidence, 3),
         "mean_ms": round(sum(timings) / len(timings), 1),
-        "p95_ms": round(sorted(timings)[-1], 1),
+        "p95_ms": round(max(timings), 1),
         "found": sorted(kinds & EXPECTED),
         "recall": round(len(kinds & EXPECTED) / len(EXPECTED), 3),
         "extra": sorted(kinds - EXPECTED),
