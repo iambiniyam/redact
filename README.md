@@ -140,7 +140,7 @@ rasterized PDF or PNG, plus a masked audit JSON
 - No telemetry, no API keys, and no network calls at runtime.
 - Audit reports store masked previews such as `j***@example.com` and `***1111`, plus a digest. They do not store the original value.
 - PDFs are flattened and metadata is cleared.
-- The original upload is deleted after processing. Redacted outputs and reports stay in `~/.redact/out` until you delete them.
+- The scan step keeps the source in `~/.redact/out/jobs` only until you apply the selection, then deletes it. Abandoned jobs are removed after 7 days. Redacted outputs and reports stay in `~/.redact/out` until you delete them.
 
 ## Limits
 
