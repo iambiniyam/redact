@@ -13,6 +13,7 @@ const findingsBody = document.getElementById("findings");
 const warnings = document.getElementById("warnings");
 const download = document.getElementById("download");
 const report = document.getElementById("report");
+const htmlReport = document.getElementById("html-report");
 
 const state = { file: null };
 const MAX_BYTES = 12 * 1024 * 1024;
@@ -128,6 +129,7 @@ function render(data) {
 
   download.href = data.download;
   report.href = data.report;
+  htmlReport.href = data.html_report || data.report;
   resultTitle.focus();
 }
 

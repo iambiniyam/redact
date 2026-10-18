@@ -10,12 +10,24 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from . import __version__
 from .config import Paths
 from .engine import process
+from .html_report import write_report
 from .ocr import backend_status
 
 app = typer.Typer(add_completion=False, help="Offline PII redaction for PDFs and images.")
 console = Console()
+
+
+@app.callback(invoke_without_command=True)
+def _root(
+    version: bool = typer.Option(False, "--version", is_eager=True, help="Show the version and exit."),
+) -> None:
+    if version:
+        console.print(__version__)
+        raise typer.Exit()
+
 
 
 def _print_findings(result) -> None:
@@ -46,10 +58,14 @@ def scan(
     no_faces: bool = typer.Option(False, "--no-faces", help="Skip face detection."),
     ocr: str = typer.Option("auto", "--ocr", help="auto, rapidocr, or indra."),
     json_out: bool = typer.Option(False, "--json", help="Print the report as JSON."),
+    html_report: Path | None = typer.Option(None, "--html-report", help="Write a masked HTML audit report."),
 ) -> None:
     """Detect PII without writing a redacted file."""
     model = None if no_faces else Paths.default().face_model
     result = process(file, dry_run=True, dpi=dpi, face_model=model, ocr_backend=ocr)
+    if html_report:
+        write_report(result, html_report)
+        console.print(f"report: {html_report}")
     if json_out:
         typer.echo(json.dumps(result.report(), indent=2, ensure_ascii=False))
         return
@@ -66,6 +82,7 @@ def apply(
     dpi: int = typer.Option(200),
     no_faces: bool = typer.Option(False, "--no-faces"),
     ocr: str = typer.Option("auto", "--ocr", help="auto, rapidocr, or indra."),
+    html_report: Path | None = typer.Option(None, "--html-report", help="Write a masked HTML audit report."),
 ) -> None:
     """Redact a PDF or image and write an audit report."""
     model = None if no_faces else Paths.default().face_model
@@ -73,6 +90,9 @@ def apply(
         file, output_path=output, report_path=report, dpi=dpi, face_model=model, ocr_backend=ocr
     )
     _print_findings(result)
+    if html_report:
+        write_report(result, html_report)
+        console.print(f"report: {html_report}")
     if result.output_path:
         console.print(Panel(f"[green]{result.output_path}[/green]", title="Redacted file"))
     if report:

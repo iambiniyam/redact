@@ -9,9 +9,11 @@ Drop in a PDF or a photo. redact finds emails, phone numbers, card numbers, IBAN
 
 ![redact web UI](docs/demo.png)
 
-Status: v0.2.1. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
+Status: v0.2.2. RapidOCR is the default fallback. Indra OCR is optional and faster. The output should always be reviewed before it is sent.
 
 ## Why
+
+See [how this compares](docs/comparison.md) with the closest tools.
 
 People send passport photos, medical forms, contracts, and receipts over email and chat every day. Many PDF redaction tools upload the original file. Some leave the text underneath the black box, where it can still be copied or searched.
 
@@ -154,7 +156,7 @@ rasterized PDF or PNG, plus a masked audit JSON
 pytest -q
 ```
 
-The suite has 10 tests covering detectors, OCR selection, the engine, the PDF pipeline, and faces.
+The suite has 12 tests covering detectors, OCR selection, the engine, the PDF pipeline, faces, and the masked HTML report.
 
 ## Roadmap
 

@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import Paths
 from .engine import process
+from .html_report import write_report
 from .ocr import OCRUnavailable, backend_status
 
 OUTPUT_DIR = Path.home() / ".redact" / "out"
@@ -35,7 +36,7 @@ ALLOWED = {".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".bmp"}
 MAX_UPLOAD = 25 * 1024 * 1024
 MAX_PDF_PAGES = 100
 
-app = FastAPI(title="redact", version="0.2.1")
+app = FastAPI(title="redact", version="0.2.2")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
@@ -79,6 +80,7 @@ async def redact(file: UploadFile = File(...), ocr: str = Form("auto")) -> JSONR
             raise HTTPException(status_code=400, detail="not a readable PDF") from exc
     output = OUTPUT_DIR / f"{job}.redacted{suffix if suffix != '.pdf' else '.pdf'}"
     report = OUTPUT_DIR / f"{job}.report.json"
+    html_report = OUTPUT_DIR / f"{job}.report.html"
 
     started = time.perf_counter()
     try:
@@ -95,6 +97,7 @@ async def redact(file: UploadFile = File(...), ocr: str = Form("auto")) -> JSONR
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     finally:
         source.unlink(missing_ok=True)
+    write_report(result, html_report)
     elapsed = round((time.perf_counter() - started) * 1000)
 
     return JSONResponse(
@@ -102,6 +105,7 @@ async def redact(file: UploadFile = File(...), ocr: str = Form("auto")) -> JSONR
             "download": f"/files/{output.name}",
             "preview": f"/files/{output.name}",
             "report": f"/files/{report.name}",
+            "html_report": f"/files/{html_report.name}",
             "is_pdf": suffix == ".pdf",
             "counts": result.counts,
             "counts_total": len(result.findings),
