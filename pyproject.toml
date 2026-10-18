@@ -33,6 +33,11 @@ ner = ["spacy>=3.8"]
 [project.scripts]
 redact = "redact.cli:app"
 
+[project.urls]
+Homepage = "https://github.com/iambiniyam/redact"
+Repository = "https://github.com/iambiniyam/redact"
+Issues = "https://github.com/iambiniyam/redact/issues"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

@@ -93,7 +93,7 @@ def doctor() -> None:
     console.print(f"pymupdf: [bold]{fitz.__version__}[/bold]")
     console.print(f"opencv: [bold]{cv2.__version__}[/bold]")
     console.print(
-        f"face model: {paths.face_model} — "
+        f"face model: {paths.face_model} "
         f"{'[green]found[/green]' if paths.face_model.exists() else '[yellow]missing (faces disabled)[/yellow]'}"
     )
     if not paths.face_model.exists():

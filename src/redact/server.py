@@ -21,7 +21,7 @@ INDEX_HTML = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>redact — share the document, not your data</title>
+<title>redact: share the document, not your data</title>
 <style>
   :root { color-scheme: light dark; --ink:#161a1d; --paper:#f7f5ef; --red:#b3261e; --line:#dcd7c8; }
   * { box-sizing:border-box; }
@@ -49,7 +49,7 @@ INDEX_HTML = """<!doctype html>
 <body>
 <header>
   <h1>redact</h1>
-  <p class="sub">Share the document, not your data. Everything runs on this machine — nothing is uploaded.</p>
+  <p class="sub">Share the document, not your data. Everything runs on this machine. Nothing is uploaded.</p>
 </header>
 <main>
   <div class="card">
@@ -74,7 +74,7 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s; re
 go.addEventListener('click', async () => {
   const f = fileInput.files[0];
   if (!f) { status.textContent = 'Choose a file first.'; return; }
-  go.disabled = true; status.textContent = 'Scanning locally…'; out.innerHTML = '';
+  go.disabled = true; status.textContent = 'Scanning locally...'; out.innerHTML = '';
   const fd = new FormData(); fd.append('file', f);
   try {
     const res = await fetch('/api/redact', { method: 'POST', body: fd });
@@ -89,7 +89,7 @@ go.addEventListener('click', async () => {
       <h3>Redacted copy ready</h3>
       <p class="muted">Review the preview before sending. The report never contains the raw values.</p>
       ${preview}
-      <table><thead><tr><th>Type</th><th>Preview</th><th>Source</th></tr></thead><tbody>${rows || '<tr><td colspan=3>No matches — review manually.</td></tr>'}</tbody></table>
+      <table><thead><tr><th>Type</th><th>Preview</th><th>Source</th></tr></thead><tbody>${rows || '<tr><td colspan=3>No matches. Review manually.</td></tr>'}</tbody></table>
       <a class="dl" href="${data.download}" download>Download redacted file</a>
       <p class="muted">${esc(data.warnings.join(' '))}</p>
     </div>`;

@@ -20,7 +20,7 @@ def main() -> int:
 
     args.dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = args.dest.with_suffix(".part")
-    print(f"→ {args.url}")
+    print(f"-> {args.url}")
     try:
         with urllib.request.urlopen(args.url, timeout=120) as response, tmp.open("wb") as handle:
             shutil.copyfileobj(response, handle)

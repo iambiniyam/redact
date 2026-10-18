@@ -1,4 +1,4 @@
-"""Document pipeline: render → detect → black out → report."""
+"""Document pipeline: render, detect, black out, and report."""
 
 from __future__ import annotations
 
